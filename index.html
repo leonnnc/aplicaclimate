@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="description" content="Mapa interactivo con clima detallado y recomendaciones de vestimenta." />
+<meta name="theme-color" content="#0b1220" />
+<title>AplicaClimate · clima detallado y vestimenta</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- Pantalla de inicio: carga el mapa y verifica las herramientas del equipo -->
+<div class="intro" id="intro">
+  <div class="intro-card">
+    <div class="intro-logo">🌦️</div>
+    <h1>AplicaClimate</h1>
+    <p class="intro-sub">Clima detallado y qué ponerte, en cualquier punto del mapa</p>
+    <div class="intro-bar"><span id="introBar"></span></div>
+    <p class="intro-msg" id="introMsg">Iniciando…</p>
+    <ul class="intro-checks" id="introChecks"></ul>
+    <button class="mini" id="introSkip">Entrar ahora</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand" title="AplicaClimate">
+      <span class="brand-icon">🌦️</span>
+      <span class="brand-text">AplicaClimate</span>
+    </div>
+
+    <div class="search" id="search">
+      <input id="searchInput" type="search" autocomplete="off" placeholder="Buscar ciudad, dirección o «lat, lon»" />
+      <button id="searchBtn" class="btn-ghost" title="Buscar">Buscar</button>
+      <ul id="searchResults" class="results" hidden></ul>
+    </div>
+
+    <div class="topactions">
+      <button id="btnLocate" class="icon-btn" title="Usar mi ubicación">📍</button>
+      <button id="btnSavePlace" class="icon-btn" title="Guardar el lugar seleccionado" disabled>⭐</button>
+      <button id="btnUnits" class="pill" title="Cambiar unidades">°C · km/h</button>
+      <button id="btnTheme" class="icon-btn" title="Tema claro / oscuro">🌙</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div id="map" class="map" aria-label="Mapa"></div>
+    <div id="viewPlace" class="view-place" hidden></div>
+    <div id="coords" class="coords">—</div>
+    <div id="mapHint" class="map-hint">Toca cualquier punto del mapa para ver el clima detallado</div>
+
+    <div id="status" class="status" hidden><span class="spinner"></span><span id="statusText"></span></div>
+
+    <aside id="panel" class="panel" aria-label="Panel de información">
+      <div class="sheet-handle" id="sheetHandle"></div>
+
+      <nav class="tabs">
+        <button class="tab active" data-tab="weather">Clima</button>
+        <button class="tab" data-tab="places">Lugares</button>
+      </nav>
+
+      <div class="panel-body">
+
+        <section id="tab-weather" class="tabpane active">
+          <div id="weatherEmpty" class="empty">
+            <div class="empty-icon">🗺️</div>
+            <p><strong>Selecciona un punto del mapa</strong></p>
+            <p class="muted">También puedes buscar un lugar arriba, usar tu ubicación 📍 o elegir un lugar guardado.</p>
+          </div>
+
+          <div id="weatherContent" hidden>
+            <header class="place-head">
+              <h1 id="placeName">—</h1>
+              <div class="place-meta">
+                <span id="placeCoords">—</span>
+                <span class="dot">·</span>
+                <span id="placeLocalTime">—</span>
+                <span id="placeElev" hidden></span>
+              </div>
+              <div id="dataState" class="data-state" hidden></div>
+              <div class="place-actions">
+                <button id="btnRename" class="mini">Renombrar</button>
+                <button id="btnQuickSave" class="mini">Guardar</button>
+                <button id="btnRefresh" class="mini">Actualizar</button>
+              </div>
+            </header>
+
+            <div id="offlineBanner" class="offline-banner" hidden></div>
+
+            <section class="card now">
+              <div class="now-main">
+                <div class="now-icon" id="nowIcon">—</div>
+                <div class="now-temp">
+                  <span id="nowTemp">—</span><span class="unit" id="nowUnit">°C</span>
+                </div>
+                <div class="now-desc">
+                  <div id="nowDesc">—</div>
+                  <div class="muted" id="nowFeels">Sensación —</div>
+                </div>
+              </div>
+              <div class="now-alert" id="nowAlert" hidden></div>
+              <div class="metrics" id="metrics"></div>
+            </section>
+
+            <section class="card" id="adviceCard">
+              <div class="card-head">
+                <h2>👕 Qué ponerte</h2>
+                <span class="badge" id="adviceBadge">—</span>
+              </div>
+
+              <figure class="outfit-figure" id="outfitFigure">
+                <img id="outfitImg" src="assets/outfits/templado.png" alt="Ilustración de la vestimenta sugerida" />
+                <figcaption>
+                  <strong id="outfitTitle">—</strong>
+                  <span id="outfitNote">—</span>
+                  <span class="of-access" id="outfitAccess"></span>
+                </figcaption>
+              </figure>
+
+              <div class="advice-controls">
+                <label>Actividad
+                  <select id="activity">
+                    <option value="rest">Tranquila / en casa</option>
+                    <option value="normal" selected>Normal / paseo</option>
+                    <option value="active">Activa / caminando</option>
+                    <option value="sport">Deporte / esfuerzo</option>
+                  </select>
+                </label>
+                <label>Sensibilidad al frío
+                  <select id="sensitivity">
+                    <option value="-1">Soy friolento/a</option>
+                    <option value="0" selected>Normal</option>
+                    <option value="1">Soy caluroso/a</option>
+                  </select>
+                </label>
+              </div>
+              <div id="adviceBody"></div>
+            </section>
+
+            <section class="card">
+              <div class="card-head"><h2>⏱️ Próximas 24 horas</h2></div>
+              <div class="hourly" id="hourly"></div>
+            </section>
+
+            <section class="card">
+              <div class="card-head"><h2>📅 Próximos 7 días</h2></div>
+              <div class="daily" id="daily"></div>
+            </section>
+
+            <details class="card" id="extrasCard">
+              <summary>📊 Más datos</summary>
+              <div class="metrics" id="extrasMetrics"></div>
+              <p class="extras-note" id="extrasNote">Variables adicionales del modelo horario.</p>
+            </details>
+
+            <section class="card" id="aqiCard" hidden>
+              <div class="card-head"><h2>🌫️ Calidad del aire</h2><span class="badge" id="aqiBadge">—</span></div>
+              <div class="metrics" id="aqiMetrics"></div>
+            </section>
+
+            <details class="card" id="toolsCard">
+              <summary>🧭 Herramientas del dispositivo</summary>
+              <ul class="tools-list" id="toolsList"></ul>
+              <div class="tools-actions">
+                <button class="mini" id="btnShare">Compartir</button>
+                <button class="mini" id="btnCopyCoords">Copiar coordenadas</button>
+                <button class="mini" id="btnCompassOn">Activar brújula</button>
+                <button class="mini" id="btnWakeLock">Pantalla activa</button>
+              </div>
+            </details>
+
+            <section class="card credits">
+              <p>Datos meteorológicos: <strong>Open-Meteo</strong> · Búsqueda: <strong>Nominatim / OpenStreetMap</strong> · Mapas: OSM, OpenTopoMap, Esri.</p>
+            </section>
+          </div>
+        </section>
+
+        <section id="tab-places" class="tabpane">
+          <div class="places-head">
+            <h2>Lugares guardados</h2>
+            <div class="places-tools">
+              <button id="btnExport" class="mini">Exportar</button>
+              <button id="btnImport" class="mini">Importar</button>
+              <input type="file" id="importFile" accept="application/json,.json" hidden />
+            </div>
+          </div>
+          <p class="muted small">Se guardan en este dispositivo, junto con su último pronóstico para poder verlos sin conexión. Toca ⭐ en el mapa para añadir el punto actual.</p>
+          <ul id="placesList" class="places-list"></ul>
+          <div id="placesEmpty" class="empty small">
+            <p>Todavía no guardaste ningún lugar.</p>
+          </div>
+        </section>
+
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="js/util.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/clothing.js"></script>
+<script src="js/places.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

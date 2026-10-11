@@ -1,0 +1,35 @@
+{
+  "appId": "com.aplicaclimate.app",
+  "productName": "AplicaClimate",
+  "copyright": "AplicaClimate · datos de Open-Meteo y OpenStreetMap",
+  "directories": {
+    "output": "release-build",
+    "buildResources": "icons"
+  },
+  "files": [
+    "index.html",
+    "manifest.webmanifest",
+    "sw.js",
+    "css/**",
+    "js/**",
+    "vendor/**",
+    "icons/**",
+    "scripts/static-server.js",
+    "electron/**"
+  ],
+  "win": {
+    "target": [
+      { "target": "nsis", "arch": ["x64"] },
+      { "target": "portable", "arch": ["x64"] }
+    ],
+    "icon": "icons/icon-512.png"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "AplicaClimate"
+  }
+}
