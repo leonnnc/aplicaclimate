@@ -387,3 +387,27 @@ Para probarla una vez sin esperar al próximo inicio de sesión: `schtasks /run 
 - El `.bat` también sirve como acceso directo: clic derecho → *Enviar a* → *Escritorio (crear acceso directo)*.
 - Si el puerto 4173 estuviera ocupado, el servidor informa en la ventana en qué puerto quedó escuchando.
 - En un equipo con Smart App Control activo, los ejecutables empaquetados sin firma están bloqueados (§13); por eso estas tres vías son las recomendadas en este equipo.
+
+---
+
+## 16. Novedades de la versión 0.3
+
+**Vestimenta con personaje fotográfico**
+- La tarjeta "Qué ponerte" ya no usa ilustraciones vectoriales planas: ahora muestra **fotografías reales del mismo personaje** (estilo urbano) con la ropa cambiada según la temperatura.
+- El personaje va **a un lado de la tarjeta y más grande**: 152×203 px en escritorio, 126×168 px en tablet y 116×155 px en móvil, con la descripción y los accesorios al costado.
+- Formato **WebP** a propósito, porque son fotografías: cada archivo pesa ~16 KB en lugar de los ~2,9 MB del PNG equivalente (de 14,6 MB a 81 KB en total). Así la app sigue liviana para la web y para el APK.
+- Archivos: `assets/outfits/verano.webp`, `calido.webp`, `templado.webp`, `frio.webp`, `extremo.webp`.
+
+**Qué imagen se muestra según la temperatura**
+
+| Banda térmica | Archivo |
+|---|---|
+| Calor extremo, Calor | `verano.webp` |
+| Cálido | `calido.webp` |
+| Templado, Fresco | `templado.webp` |
+| Frío, Muy frío | `frio.webp` |
+| Helado, Frío extremo | `extremo.webp` |
+
+**Cómo cambiar el personaje o la ropa**: reemplazá esos 5 archivos manteniendo los nombres (encuadre vertical 3:4, recomendado 360×480 px o más) y ejecutá `npm run build:web`. No hace falta tocar código: el mapeo banda → imagen está en `js/clothing.js`.
+
+> Nota técnica: el control de recursos de `npm run build:web` detectó que `index.html` todavía apuntaba al PNG antiguo como imagen por defecto y abortó la compilación (código 1) — el fallo era real y se corrigió apuntando al `.webp`. Ese control es la red de seguridad que evita publicar una versión con imágenes rotas.

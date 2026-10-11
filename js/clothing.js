@@ -389,3 +389,18 @@
     }
   });
 })();
+
+/* ---------- v0.3: fotografías reales del personaje en formato WebP ----------
+   Las ilustraciones vectoriales planas se reemplazaron por fotos urbanas del
+   mismo personaje (una por banda térmica). Se generan en WebP porque son
+   fotografías: cada archivo pesa ~16 KB en lugar de ~2,9 MB del PNG original. */
+(function () {
+  'use strict';
+
+  var NS = window.CM;
+  if (!NS || !NS.clothing || !NS.clothing.BANDS) return;
+
+  NS.clothing.BANDS.forEach(function (b) {
+    if (b.image) b.image = b.image.replace(/\.png$/i, '.webp');
+  });
+})();
