@@ -1076,3 +1076,39 @@ details.card[open] > summary { margin-bottom: 10px; }
     white-space: normal;
   }
 }
+
+/* ============================================================
+   v0.8 · atribuciones del mapa discretas pero legibles
+   Ese recuadro son los créditos obligatorios de los mapas: Leaflet antepone la
+   bandera de Ucrania (1.9) y "© OpenStreetMap" es la licencia de los tiles, así
+   que no se puede eliminar. Lo que sí se puede es bajarle el peso visual para que
+   no parezca un cartel blanco encima del mapa.
+   ============================================================ */
+.leaflet-control-attribution {
+  background: rgba(9, 15, 28, .66) !important;
+  color: rgba(226, 234, 248, .78) !important;
+  font-size: 10.5px !important;
+  line-height: 1.35 !important;
+  padding: 1px 7px !important;
+  border-radius: 7px 0 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+  border-left: 1px solid rgba(255, 255, 255, .07);
+  backdrop-filter: blur(4px);
+}
+.leaflet-control-attribution a {
+  color: rgba(226, 234, 248, .92) !important;
+  text-decoration: none;
+}
+.leaflet-control-attribution a:hover { text-decoration: underline; }
+
+/* El icono/bandera que Leaflet antepone al crédito se ve como un recuadro azul y
+   amarillo suelto; el crédito de texto ("Leaflet" y "© OpenStreetMap") se mantiene. */
+.leaflet-control-attribution .leaflet-attribution-flag { display: none !important; }
+
+html[data-theme="light"] .leaflet-control-attribution {
+  background: rgba(255, 255, 255, .78) !important;
+  color: #46566f !important;
+  border-top-color: rgba(17, 35, 60, .10);
+  border-left-color: rgba(17, 35, 60, .10);
+}
+html[data-theme="light"] .leaflet-control-attribution a { color: #2a3d59 !important; }
