@@ -1,6 +1,6 @@
 {
   "name": "aplicaclimate",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Mapa interactivo con clima detallado y recomendaciones de vestimenta (web, escritorio y móvil)",
   "author": "AplicaClimate",

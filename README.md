@@ -411,3 +411,19 @@ Para probarla una vez sin esperar al próximo inicio de sesión: `schtasks /run 
 **Cómo cambiar el personaje o la ropa**: reemplazá esos 5 archivos manteniendo los nombres (encuadre vertical 3:4, recomendado 360×480 px o más) y ejecutá `npm run build:web`. No hace falta tocar código: el mapeo banda → imagen está en `js/clothing.js`.
 
 > Nota técnica: el control de recursos de `npm run build:web` detectó que `index.html` todavía apuntaba al PNG antiguo como imagen por defecto y abortó la compilación (código 1) — el fallo era real y se corrigió apuntando al `.webp`. Ese control es la red de seguridad que evita publicar una versión con imágenes rotas.
+
+---
+
+## 17. Novedades de la versión 0.4
+
+**La hoja inferior se repliega de verdad (móvil y ventanas angostas)**
+
+- Antes, al minimizar la hoja, el panel se desplazaba con `translateY(calc(100% - 108px))` —un cálculo frágil que dependía de la altura real del panel— y los elementos flotantes (atribución de los mapas, nombre de la zona y coordenadas) estaban anclados a `66dvh` fijo, así que **no acompañaban a la hoja** y quedaban flotando en medio del mapa.
+- Ahora la hoja reduce su altura a un asomo compacto de **152 px** (asa + pestañas + nombre del lugar con sus coordenadas y hora) mediante una transición de altura, y **todo lo que flota se apoya en el borde real de la hoja**, repartido en tres líneas para que no se pisen: aviso del mapa arriba, nombre de la zona en medio, coordenadas abajo (la atribución, a la derecha).
+- En pantallas bajas (menos de 620 px de alto) el asomo se reduce a 128 px y los avisos se reacomodan.
+- Verificado con mediciones reales en 654×741 y 390×844 px, con la hoja replegada y expandida y con los cuatro mapas base: **todas las intersecciones entre avisos dieron 0 px²**, sin errores de consola.
+
+**Dos correcciones técnicas que conviene registrar**
+
+1. El primer intento usó el combinador de hermanos (`.panel.collapsed ~ .coords`), pero `.panel` es el **último** hijo de `main`, y `~` solo alcanza a los hermanos **posteriores**: ninguna regla coincidía y el fallo pasaba inadvertido. Se resolvió con `:has()` sobre el contenedor —`main.main:has(.panel.collapsed) …`—, que no depende del orden del DOM. Requiere Chrome/WebView 105+; el proyecto ya necesitaba 108+ por `dvh`, así que no agrega requisitos.
+2. Con el mapa **Satélite**, la atribución de Esri (una cadena muy larga) se partía en dos líneas a todo el ancho y se montaba sobre el chip de coordenadas: **3364 px² de solape** medidos en pantalla angosta. Se confinó al sector derecho con `max-width: calc(100vw - 152px)`; la atribución sigue legible y ya no se pisa con nada.

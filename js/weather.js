@@ -543,3 +543,33 @@
     });
   };
 })();
+
+/* ---------- v0.4: el subtítulo del lugar no repite el nombre ----------
+   Algunos respaldos de geocodificación (BigDataCloud) devuelven el mismo texto
+   como nombre y como primera parte del subtítulo, y el chip de la zona quedaba
+   como "Logan County · Logan County, Oklahoma, ...". */
+(function () {
+  'use strict';
+
+  var NS = window.CM;
+  if (!NS || !NS.weather || typeof NS.weather.reverse !== 'function') return;
+  var w = NS.weather;
+  var original = w.reverse;
+
+  w.reverse = function (lat, lon) {
+    return original(lat, lon).then(function (place) {
+      if (!place || !place.subtitle) return place;
+      var nombre = String(place.name || '').trim().toLowerCase();
+      var vistos = {};
+      var partes = String(place.subtitle).split(',').map(function (s) { return s.trim(); }).filter(function (s) {
+        if (!s) return false;
+        var clave = s.toLowerCase();
+        if (clave === nombre || vistos[clave]) return false;
+        vistos[clave] = 1;
+        return true;
+      });
+      place.subtitle = partes.join(', ');
+      return place;
+    });
+  };
+})();
